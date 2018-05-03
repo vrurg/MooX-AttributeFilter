@@ -1,0 +1,13 @@
+.last_cover_stats
+/META.yml
+/META.json
+/MYMETA.*
+/MooX-AttributeFilter-v*
+*.o
+*.pm.tdy
+*.bs
+
+# Dizt::Zilla
+/.build/
+
+.komodotools
