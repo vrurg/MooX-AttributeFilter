@@ -2,10 +2,11 @@
 /META.yml
 /META.json
 /MYMETA.*
-/MooX-AttributeFilter-v*
+/MooX-AttributeFilter-[0-9]*
 *.o
 *.pm.tdy
 *.bs
+MooX-AttributeFilter-[0-9]*
 
 # Dizt::Zilla
 /.build/
