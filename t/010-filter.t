@@ -135,6 +135,28 @@ subtest "Triggering", sub {
     like( $o->trig_arg, "_filter_tattr(set)", "triggered from write" );
 };
 
+subtest "Coercing", sub {
+    plan 1;
+
+    package Coercing {
+        use Moo;
+        use MooX::AttributeFilter;
+
+        has cattr => (
+            is     => 'rw',
+            coerce => sub { $_[0] + 1 },
+            filter => sub {
+                my $this = shift;
+                return -$_[0];
+            },
+        );
+    }
+
+    my $o = Coercing->new;
+    $o->cattr(3.1415926);
+    is( $o->cattr, -2.1415926, "coerce applied" );
+};
+
 subtest "Child::NoFilter", sub {
     plan 2;
 
