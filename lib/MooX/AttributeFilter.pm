@@ -1,5 +1,5 @@
-#
 # ABSTRACT: Implements 'filter' option for Moo-class attributes
+
 =head1 SYNOPSIS
 
     package My::Class {
@@ -58,20 +58,23 @@
 =head1 DESCRIPTION
 
 The idea behind this extension is to overcome the biggest deficiency of
-coercion: its ignorance about the object it is acting for. Triggers are executed
-as methods but they don't receive the previous value and they're called after
-attribute is set.
+coercion: its ignorance about the object it is acting for. While triggers are
+executed as methods, they don't receive the previous attribute value; and
+they're called after the attribute is set.
 
-A filter is a method which is called right before attribute value is about to be
-set and receives 1 or two arguments of which the first one is the new attribute
-value; the second one is the old value. Number of arguments passed depends on
-when the filter get called: on the construction stage it is one, and it is two
-when set manually. B<Note> that in the latter case if it's the first time the
-attribute is set the old value would be undefined.
+Filter is a method which is called right before attribute value is about to be
+set. It receives one or two arguments of which the first is the new attribute
+value; the second is the old value. Number of arguments passed depends on
+what stage the filter get called at: one is for the construction, two is when
+set by writer.
 
-It is also worth mentioning that filter is called always when attribute is
-set, including initialization from constructor arguments or lazy builders. See
-the SYNOPSIS. In both cases filter gets called with a single argument.
+B<Note:> When an attribute was never set before and a writer is used then the
+old value filter argument will be undefined.
+
+It is also worth mentioning that a filter is called I<always> upon writing a
+value into attribute, including initialization from constructor arguments or
+lazy builders. See the L</SYNOPSIS>. In both cases the filter gets called with a
+single argument.
 
 I.e.:
 
@@ -98,20 +101,19 @@ I.e.:
     $obj = LazyOne->new( lazyField => "bar" );  # Arguments: 1
     $obj->lazyField( "foobar" );                # Arguments: 2
     
-A filter method must always return a (possibly changed) value to be stored in
-the attribute.
+Filter method must always return a (possibly modified) value.
 
-Filter called I<before> anything else on the attribute. Its return value is then
-subject for passing through C<isa> and C<coerce>.
+Filter is called I<before> any other attribute handlers. Its return value is
+then subject for passing through C<isa> and C<coerce>.
 
 =head2 Use cases
 
 Filters are of the most use when attribute value (or allowed values) depends on
-other attributes of its object. The dependency could be hard (or C<isa>-like) –
-i.e. when an exception must be thrown if value doesn't pass validation. Or it
-could be soft when by storing a vlue code I<suggest> what it would like to see
-in the attribute but the resulting value might be changed depending on the
-current environment. For example:
+other attributes of its object (or even other linked objects). The dependency
+could be hard (C<isa>-like) – i.e. an exception must be thrown if value doesn't
+pass validation. Or it could be soft: by storing a value calling code I<suggest>
+what it would like to see in the attribute but the result might be changed
+depending on the current environment. For example:
 
     package ChDir {
         use File::Spec;
@@ -121,10 +123,10 @@ current environment. For example:
         
         has curDir => (
             is => 'rw',
-            filter => 'chDir',
+            filter => 'fullPath',
         );
         
-        sub chDir {
+        sub fullPath {
             my $this = shift;
             my ( $subdir ) = @_;
             
@@ -139,17 +141,17 @@ current environment. For example:
 
 * This module doesn't inflate into Moose.
 
-* The code relies on very low-level functionality of Method::Generate family
-  of modules. For this reason it may become incompatible with a future versions
-  of the modules.
+* The code relies on low-level functionality of Method::Generate family of
+  modules. For this reason it may become incompatible with their future versions 
+  if they get drastically changed.
 
-=head1 ACKNOWLEDGEMENT
+=head1 ACKNOWLEDGEMENTS
 
-This module is a result of rejection to include filtering functionality into
-the Moo core. Since the reasoning behind the rejection was really convincing
-but the functionality is badly wanted I had no choices left... So, my great
-thanks to Graham Knopp <haarg@haarg.org> for his advises, sample code, and
-Moo itself, of course!
+This work is a result of refusal to include filtering functionality into the Moo
+core. Since the refusal was backed by strong reasoning while the functionality
+itself is badly wanted there was no other choice but to create the module... So,
+my great thanks to Graham Knopp <haarg@haarg.org> for his advises, sample code,
+and Moo itself, of course!
 
 =cut
 
