@@ -158,7 +158,7 @@ and Moo itself, of course!
 package MooX::AttributeFilter;
 use strictures 1;
 
-our $VERSION = '0.001001';
+our $VERSION = '0.001002';
 
 use Carp;
 use Scalar::Util qw<looks_like_number>;
