@@ -14,17 +14,6 @@ require Method::Generate::Accessor;
 
 my %filterClasses;
 
-# TODO Look into _generate_simple_set too!
-#install_modifier "Method::Generate::Accessor", 'around',
-#  '_generate_simple_set', sub {
-#    my $orig = shift;
-#    say STDERR "_generate_simple_set(",
-#      join( ",", map { $_ // '*undef*' } @_ ), ")";
-#    my $rc = $orig->(@_);
-#    say STDERR "_generate_simple_set result:", $rc;
-#    return $rc;
-#  };
-
 install_modifier "Method::Generate::Accessor", 'around',
   '_generate_core_set', sub {
     my $orig = shift;
@@ -98,7 +87,12 @@ install_modifier "Method::Generate::Accessor", 'around', 'generate_method',
     my ( $into, $name, $spec, $quote_opts ) = @_;
 
     if ( $filterClasses{$into} && $spec->{filter} ) {
-        say STDERR "--- Installing filter into ${into}::${name}";
+
+        #say STDERR "--- Installing filter into ${into}::${name}";
+
+        croak "Incompatibe 'is' option '$spec->{is}': can't install filter"
+          unless $spec->{is} =~ /^rwp?$/n;
+
         my $filterSub;
         if ( $spec->{filter} eq 1 ) {
             $filterSub = "_filter_${name}";
@@ -116,11 +110,11 @@ install_modifier "Method::Generate::Accessor", 'around', 'generate_method',
         croak
           "No filter method '$filterSub' defined for $into attribute '$name'"
           unless $filterCode;
-          
+
         $spec->{filter_sub} = $filterCode;
     }
 
-    return $orig->($this, @_);
+    return $orig->( $this, @_ );
   };
 
 sub import {
@@ -128,64 +122,6 @@ sub import {
     my $target = caller;
 
     $filterClasses{$target} = 1;
-
-    #install_modifier $target, 'around', 'has', sub {
-    #    my $orig = shift;
-    #    my ( $attrName, %options ) = @_;
-    #    my $filterSub = $options{filter};
-    #
-    #    #delete $options{filter};
-    #
-    #    return $orig->(@_) unless $filterSub;
-    #
-    #    say STDERR "--- Overriding attribute ${target}::${attrName}";
-    #
-    #    $filterSub = '_filter_' . $attrName if $filterSub eq 1;
-    #
-    #    my ( $is, $wrSub ) = @options{qw<is writer>};
-    #    if ( $is eq 'rw' ) {
-    #        $wrSub ||= $attrName;
-    #    }
-    #    elsif ( $is eq 'rwp' ) {
-    #        $wrSub ||= "_set_$attrName";
-    #    }
-    #    else {
-    #        croak "Filter makes no sense on read-only attribute $attrName";
-    #    }
-    #
-    #    $options{predicate} ||= '_has_' . $attrName;
-    #    my $predSub = $options{predicate};
-    #
-    #    my $filterCode =
-    #      ref($filterSub) ? $filterSub : $target->can($filterSub);
-    #
-    #    $options{filter_sub} = $filterCode;
-    #    $options{filter}     = 1;
-    #
-    #    #say STDERR "Using filter code:", $filterCode;
-    #
-    #    $orig->( $attrName, %options );
-    #
-    #    #$target->can('around')->(
-    #    #    $wrSub,
-    #    #    sub {
-    #    #        my $orig = shift;
-    #    #        my $this = shift;
-    #    #
-    #    #        return $orig->($this) unless @_;
-    #    #
-    #    #        my ($value) = $_[0];
-    #    #
-    #    #        # Don't try fetching value if attribute is not set yet.
-    #    #        # Takes care of lazy attributes.
-    #    #
-    #    #        my $oldValue = $this->$predSub ? $this->$attrName : undef;
-    #    #
-    #    #        return $orig->( $this,
-    #    #            $filterCode->( $this, $value, $oldValue ) );
-    #    #    }
-    #    #);
-    #};
 }
 
 1;
