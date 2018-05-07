@@ -156,6 +156,7 @@ and Moo itself, of course!
 =cut
 
 package MooX::AttributeFilter;
+use v5.10;
 use strictures 1;
 
 our $VERSION = '0.001004';
