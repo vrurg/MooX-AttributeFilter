@@ -1,5 +1,6 @@
 #
-use v5.24;
+use strict;
+use warnings;
 use Test2::V0;
 
 plan 3;
