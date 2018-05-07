@@ -158,7 +158,7 @@ and Moo itself, of course!
 package MooX::AttributeFilter;
 use strictures 1;
 
-our $VERSION = '0.001003';
+our $VERSION = '0.001004';
 
 use Carp;
 use Scalar::Util qw<looks_like_number>;
@@ -246,7 +246,7 @@ install_modifier "Method::Generate::Accessor", 'around', 'generate_method',
         #say STDERR "--- Installing filter into ${into}::${name}";
 
         croak "Incompatibe 'is' option '$spec->{is}': can't install filter"
-          unless $spec->{is} =~ /^rwp?$/n;
+          unless $spec->{is} =~ /^rwp?$/;
 
         my $filterSub;
         if ( $spec->{filter} eq 1 ) {
