@@ -28,10 +28,6 @@ sub filter2 {
     return "second($_[0])";
 }
 
-package MooseClass;
-use Moose;
-extends qw<MooClass>;
-
 package main;
 
 BEGIN {
@@ -47,6 +43,12 @@ BEGIN {
         "Cannot test without required Moose and MooseX::AttributeFilter modules"
     ) if $skipTest;
 }
+
+eval q{
+    package MooseClass;
+    use Moose;
+    extends qw<MooClass>;
+};
 
 use Test::Moose;
 
