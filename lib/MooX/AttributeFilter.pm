@@ -278,6 +278,22 @@ sub import {
     my $target = caller;
 
     $filterClasses{$target} = 1;
+    install_modifier $target, 'around', 'has', sub {
+        my $orig = shift;
+        my ( $attr, %opts ) = @_;
+        return $orig->( $attr, %opts ) unless $opts{filter};
+        say STDERR "INFLATING for $attr";
+        $opts{moosify} ||= [];
+        push @{ $opts{moosify} }, sub {
+            my ($spec) = @_;
+            require    # hide from CPANTS
+              MooseX::AttributeFilter;
+            $spec->{traits} ||= [];
+            push @{ $spec->{traits} }, 'MooseX::AttributeFilter::Trait::Attribute';
+        };
+        
+        $orig->($attr, %opts);
+    };
 }
 
 1;
