@@ -256,7 +256,7 @@ install_modifier "Method::Generate::Accessor", 'around', 'generate_method',
         else {
             $filterSub = $spec->{filter};
         }
-        $spec->{filter} = 1;
+#        $spec->{filter} = 1;
 
         croak "Attribute '$name' filter option has invalid value"
           if ref($filterSub) && ref($filterSub) ne 'CODE';
@@ -277,21 +277,24 @@ sub import {
     my ($class) = @_;
     my $target = caller;
 
+    my $trait = Role::Tiny->can('is_role') && Role::Tiny->is_role($target)
+        ? 'MooseX::AttributeFilter::Trait::Attribute::Role'
+        : 'MooseX::AttributeFilter::Trait::Attribute';
+
     $filterClasses{$target} = 1;
     install_modifier $target, 'around', 'has', sub {
         my $orig = shift;
         my ( $attr, %opts ) = @_;
         return $orig->( $attr, %opts ) unless $opts{filter};
-        say STDERR "INFLATING for $attr";
         $opts{moosify} ||= [];
         push @{ $opts{moosify} }, sub {
             my ($spec) = @_;
             require    # hide from CPANTS
               MooseX::AttributeFilter;
             $spec->{traits} ||= [];
-            push @{ $spec->{traits} }, 'MooseX::AttributeFilter::Trait::Attribute';
+            $spec->{bypass_filter_method_check} = 1;
+            push @{ $spec->{traits} }, $trait;
         };
-        
         $orig->($attr, %opts);
     };
 }
