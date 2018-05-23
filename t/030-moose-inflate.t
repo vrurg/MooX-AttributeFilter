@@ -7,7 +7,6 @@ package MooClass;
 
 use Moo;
 use MooX::AttributeFilter;
-use Types::Standard qw(Any);
 
 has attr => (
     is     => 'rw',
