@@ -44,7 +44,8 @@ BEGIN {
         "Cannot test without required Moose and MooseX::AttributeFilter modules"
     ) if $skipTest;
     skip_all("MooseX::AttributeFilter version 0.08 is required")
-      unless !$skipTest && MooseX::AttributeFilter->VERSION("0.08");
+      unless !$skipTest
+      && MooseX::AttributeFilter->VERSION >= version->parse("0.08");
 }
 
 eval q{
