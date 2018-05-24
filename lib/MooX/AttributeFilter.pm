@@ -159,7 +159,7 @@ package MooX::AttributeFilter;
 use v5.10;
 use strictures 1;
 
-our $VERSION = '0.001902';
+our $VERSION = '0.001903';
 
 use Carp;
 use Scalar::Util qw<looks_like_number>;
