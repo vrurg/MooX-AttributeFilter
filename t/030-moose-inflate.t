@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use Test2::V0;
+use version;
 
 package MooClass;
 
@@ -42,6 +43,8 @@ BEGIN {
     skip_all(
         "Cannot test without required Moose and MooseX::AttributeFilter modules"
     ) if $skipTest;
+    skip_all("MooseX::AttributeFilter version 0.08 is required")
+      unless !$skipTest && MooseX::AttributeFilter->VERSION("0.08");
 }
 
 eval q{
@@ -51,20 +54,20 @@ eval q{
     1;
 } or die $@;
 
-for (0..1) {
+for ( 0 .. 1 ) {
     my $obj1 = MooClass->new;
     $obj1->attr("a value");
     is( $obj1->attr, "filtered(a value)", "_filter_attr for attr" );
     $obj1->attr2("3.1415926");
     is( $obj1->attr2, "second(3.1415926)", "filter2 for attr2" );
-    
+
     my $obj2 = MooseClass->new;
     $obj2->attr("a value");
     is( $obj2->attr, "filtered(a value)", "_filter_attr for attr" );
     $obj2->attr2("3.1415926");
     is( $obj2->attr2, "second(3.1415926)", "filter2 for attr2" );
-    
-    MooseClass->meta->make_immutable(inline_constructor => 1);
+
+    MooseClass->meta->make_immutable( inline_constructor => 1 );
 }
 
 done_testing;
