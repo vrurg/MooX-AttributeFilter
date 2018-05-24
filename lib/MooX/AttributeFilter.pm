@@ -159,13 +159,12 @@ package MooX::AttributeFilter;
 use v5.10;
 use strictures 1;
 
-our $VERSION = '0.001904';
+our $VERSION = '0.001905';
 
 use Carp;
 use Scalar::Util qw<looks_like_number>;
 use Class::Method::Modifiers qw(install_modifier);
 use Sub::Quote qw<quotify>;
-use Data::Dumper;
 require Method::Generate::Accessor;
 
 my %filterClasses;
@@ -179,7 +178,6 @@ install_modifier "Method::Generate::Accessor", 'around',
     my $filterVal = $value;
 
     #say STDERR "Generating core set for $me,$name,$spec,$value";
-    #say STDERR Dumper( $this->{captures} );
     if ( $spec->{filter} && $spec->{filter_sub} && !$spec->{".filter_no_core"} )
     {
 
