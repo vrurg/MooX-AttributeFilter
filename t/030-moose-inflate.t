@@ -28,10 +28,6 @@ sub filter2 {
     return "second($_[0])";
 }
 
-package MooseClass;
-use Moose;
-extends qw<MooClass>;
-
 package main;
 
 BEGIN {
@@ -48,15 +44,27 @@ BEGIN {
     ) if $skipTest;
 }
 
-use Test::Moose;
+eval q{
+    package MooseClass;
+    use Moose;
+    extends qw<MooClass>;
+    1;
+} or die $@;
 
-with_immutable {
-    my $obj = MooseClass->new;
-    $obj->attr("a value");
-    is( $obj->attr, "filtered(a value)", "_filter_attr for attr" );
-    $obj->attr2("3.1415926");
-    is( $obj->attr2, "second(3.1415926)", "filter2 for attr2" );
+for (0..1) {
+    my $obj1 = MooClass->new;
+    $obj1->attr("a value");
+    is( $obj1->attr, "filtered(a value)", "_filter_attr for attr" );
+    $obj1->attr2("3.1415926");
+    is( $obj1->attr2, "second(3.1415926)", "filter2 for attr2" );
+    
+    my $obj2 = MooseClass->new;
+    $obj2->attr("a value");
+    is( $obj2->attr, "filtered(a value)", "_filter_attr for attr" );
+    $obj2->attr2("3.1415926");
+    is( $obj2->attr2, "second(3.1415926)", "filter2 for attr2" );
+    
+    MooseClass->meta->make_immutable(inline_constructor => 1);
 }
-qw<MooseClass>;
 
 done_testing;
