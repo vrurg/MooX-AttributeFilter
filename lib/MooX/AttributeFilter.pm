@@ -136,10 +136,12 @@ depending on the current environment. For example:
         );
     }
 }
+
+=head2 Inflation to Moose
+
+This module inflates into L<MooseX::AttributeFilter>.
     
 =head1 CAVEATS
-
-* This module doesn't inflate into Moose.
 
 * The code relies on low-level functionality of Method::Generate family of
   modules. For this reason it may become incompatible with their future versions 
@@ -152,6 +154,10 @@ core. Since the refusal was backed by strong reasoning while the functionality
 itself is badly wanted there was no other choice but to create the module... So,
 my great thanks to Graham Knopp <haarg@haarg.org> for his advises, sample code,
 and Moo itself, of course!
+
+My special thanks to Princess Kitten <littleprincess@kittymail.com> who
+implemented similar module for Moose framework and made the inflation code
+working.
 
 =cut
 

@@ -564,6 +564,7 @@ sub _order_test_with_filter {
     $class->resetOrder;
     my $obj;
     eval { $obj = $class->new( attr => "3.1415926" ); };
+    diag("Error while creating a object:\n", $@) if $@;
     ok( !$@, "new finishes normally" );
     is( $obj->attr, "filtered(3.1415926)",
         "value passed the filter with constructor" );
