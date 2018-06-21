@@ -1,9 +1,9 @@
-## Please see file perltidy.ERR
 use 5.010000;
 use strict;
 use warnings;
 use Test2::V0;
-use Test2::Tools::Spec;
+use Test2::Tools::Spec ':ALL';
+use __MAF::Test;
 
 describe filtering => sub {
 
@@ -19,48 +19,97 @@ describe filtering => sub {
         $filterCase = 'Role';
     };
 
-    tests Simple => sub {
-        my $class = $generator->(
-            body => <<'CODE',
+    describe Basic => sub {
+        my ($filterOpt, $filterSub);
+
+        # filter => sub {},
+        case Anonymous => sub {
+            $filterOpt = q<sub {
+        my $this = shift;
+        return "basicFlt($_[0])";
+    }>;
+            $filterSub = '';
+        };
+
+        # filter => 1,
+        case Default => sub {
+            $filterOpt = '1';
+            $filterSub = q<sub _filter_attr {
+    my $this = shift;
+    return "basicFlt($_[0])";
+}>;
+        };
+
+        # filter => 'namedFilter',
+        case Named => sub {
+            $filterOpt = q<'namedFilter'>;
+            $filterSub = q<sub namedFilter {
+    my $this = shift;
+    return "basicFlt($_[0])";
+}>;
+        };
+
+        describe RWMode => sub {
+            my $rwMode;
+
+            case RW => sub { $rwMode = 'rw' };
+            case RWP => sub { $rwMode = 'rwp' };
+            case RO => sub { $rwMode = 'ro' };
+
+            tests Constructor => sub {
+                my $class = $generator->(
+                    body => <<CODE,
 use MooX::AttributeFilter;
 
-has f_anonymous => (
-    is     => 'rw',
-    filter => sub {
-        my $this = shift;
-        return "anonymous($_[0])";
-    },
+has attr => (
+    is => '${rwMode}',
+    filter => $filterOpt,
 );
 
-has f_default => (
-    is     => 'rw',
-    filter => 1,
+has noFilter => (
+    is => '${rwMode}',
 );
 
-has f_named => (
-    is     => 'rw',
-    filter => 'namedFilter',
-);
-
-sub _filter_f_default {
-    my $this = shift;
-    return "default($_[0])";
-}
-
-sub namedFilter {
-    my $this = shift;
-    return "named($_[0])";
-}
+$filterSub
 CODE
-        );
+                );
 
-        my $o = $class->new;
-        $o->f_anonymous("value");
-        like( $o->f_anonymous, "anonymous(value)", "simple anonymous" );
-        $o->f_default("value");
-        like( $o->f_default, "default(value)", "simple default" );
-        $o->f_named("value");
-        like( $o->f_named, "named(value)", "simple named" );
+                my $val = _randomName;
+                my $nfVal = "nofilter_" . $val;
+                my $o = $class->new(attr => $val, noFilter => $nfVal);
+                is($o->attr, "basicFlt($val)", "attribute filtered");
+                is($o->noFilter, $nfVal, "unfiltered attribute ok");
+            };
+
+            tests Writer => sub {
+                my $class = $generator->(
+                    body => <<CODE,
+use MooX::AttributeFilter;
+
+has attr => (
+    is => '${rwMode}',
+    filter => $filterOpt,
+    writer => 'setAttr',
+);
+
+has noFilter => (
+    is => '${rwMode}',
+    writer => 'setNoFilter',
+);
+
+$filterSub
+CODE
+                );
+
+                my $val = _randomName;
+                my $nfVal = "nofilter_" . $val;
+                my $o = $class->new;
+                $o->setAttr($val);
+                $o->setNoFilter($nfVal);
+                is($o->attr, "basicFlt($val)", "attribute filtered");
+                is($o->noFilter, $nfVal, "unfiltered attribute ok");
+            };
+        };
     };
 
     my $oldValueBody = <<'CODE';
@@ -520,93 +569,5 @@ sub getOrder {
         };
     };
 };
-
-sub _guessTestName {
-    ( caller(2) )[3] =~ m/<([^:]+)>$/;
-    return $1;
-}
-
-sub _randomName {
-    my $chars = [ 'A' .. 'Z', 'a' .. 'z', '0' .. '9' ];
-    my $name = '';
-    $name .= $chars->[ rand( scalar @$chars ) ] for 1 .. 6;
-    return "Tst_" . $name;
-}
-
-sub _class_generator {
-    my (%testParams) = @_;
-    my $prefix = "__MAFT::Class::";
-    my $className = $prefix . ( $testParams{name} || _randomName );
-
-    #diag "CLASS NAME:" . $className;
-
-    my $body    = $testParams{body} // '';
-    my $extends = '';
-
-    if ( $testParams{extends} ) {
-        my @extList =
-          ref( $testParams{extends} )
-          ? @{ $testParams{extends} }
-          : ( $testParams{extends} );
-        $extends =
-          "extends qw<" . join( " ", map { $prefix . $_ } @extList ) . ">;";
-    }
-
-    my $rc = eval <<CLASS;
-package $className;
-
-use Moo;
-$extends
-
-$body
-
-1;
-CLASS
-    die $@ if $@;
-    return $className;
-}
-
-sub _role_generator {
-    my (%testParams) = @_;
-    my $prefix = "__MAFT::Role::";
-    my $testName  = $testParams{name} || _randomName;
-    my $roleName  = $prefix . $testName;
-    my $className = "__MAFT::RoleClass::" . $testName;
-
-    my $body = $testParams{body} // '';
-    my $with = '';
-
-    if ( $testParams{extends} ) {
-        my @extList =
-          ref( $testParams{extends} )
-          ? @{ $testParams{extends} }
-          : ( $testParams{extends} );
-        $with = "with qw<" . join( " ", map { $prefix . $_ } @extList ) . ">;";
-    }
-
-    my $code = <<ROLE;
-package ${roleName};
-
-use Moo::Role;
-$with
-
-$body
-
-1;
-ROLE
-    my $rc = eval $code;
-    die $@ if $@;
-
-    $rc = eval <<CLASS;
-package ${className};
-
-use Moo;
-with qw<${roleName}>;
-
-1;
-CLASS
-    die $@ if $@;
-    return $className;
-}
 
 done_testing;

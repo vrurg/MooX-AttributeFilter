@@ -284,8 +284,8 @@ install_modifier "Method::Generate::Accessor", 'around', 'generate_method',
 
     if ( $filterClasses{$into} && $spec->{filter} ) {
 
-        croak "Incompatibe 'is' option '$spec->{is}': can't install filter"
-          unless $spec->{is} =~ /^rwp?$/;
+        #croak "Incompatibe 'is' option '$spec->{is}': can't install filter"
+        #  unless $spec->{is} =~ /^(rwp?|ro)$/;
 
         my $filterSub;
         if ( $spec->{filter} eq 1 ) {

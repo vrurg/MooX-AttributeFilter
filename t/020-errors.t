@@ -3,23 +3,6 @@ use strict;
 use warnings;
 use Test2::V0;
 
-plan 3;
-
-eval {
-    package BadAttr;
-    use Moo;
-    use MooX::AttributeFilter;
-
-    has attr => (
-        is     => 'ro',
-        filter => sub { },
-    );
-    1;
-};
-
-like( $@, qr/Incompatibe 'is' option 'ro': can't install filter/,
-    "is => 'ro'" );
-
 eval {
     package BadRef;
     use Moo;
