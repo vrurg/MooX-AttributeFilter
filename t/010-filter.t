@@ -20,7 +20,7 @@ describe filtering => sub {
     };
 
     describe Basic => sub {
-        my ($filterOpt, $filterSub);
+        my ( $filterOpt, $filterSub );
 
         # filter => sub {},
         case Anonymous => sub {
@@ -52,9 +52,9 @@ describe filtering => sub {
         describe RWMode => sub {
             my $rwMode;
 
-            case RW => sub { $rwMode = 'rw' };
+            case RW  => sub { $rwMode = 'rw' };
             case RWP => sub { $rwMode = 'rwp' };
-            case RO => sub { $rwMode = 'ro' };
+            case RO  => sub { $rwMode = 'ro' };
 
             tests Constructor => sub {
                 my $class = $generator->(
@@ -74,11 +74,11 @@ $filterSub
 CODE
                 );
 
-                my $val = _randomName;
+                my $val   = _randomName;
                 my $nfVal = "nofilter_" . $val;
-                my $o = $class->new(attr => $val, noFilter => $nfVal);
-                is($o->attr, "basicFlt($val)", "attribute filtered");
-                is($o->noFilter, $nfVal, "unfiltered attribute ok");
+                my $o     = $class->new( attr => $val, noFilter => $nfVal );
+                is( $o->attr,     "basicFlt($val)", "attribute filtered" );
+                is( $o->noFilter, $nfVal,           "unfiltered attribute ok" );
             };
 
             tests Writer => sub {
@@ -101,13 +101,13 @@ $filterSub
 CODE
                 );
 
-                my $val = _randomName;
+                my $val   = _randomName;
                 my $nfVal = "nofilter_" . $val;
-                my $o = $class->new;
+                my $o     = $class->new;
                 $o->setAttr($val);
                 $o->setNoFilter($nfVal);
-                is($o->attr, "basicFlt($val)", "attribute filtered");
-                is($o->noFilter, $nfVal, "unfiltered attribute ok");
+                is( $o->attr,     "basicFlt($val)", "attribute filtered" );
+                is( $o->noFilter, $nfVal,           "unfiltered attribute ok" );
             };
         };
     };
@@ -245,7 +245,7 @@ CODE
     tests 'ChildNoFilter' => sub {
         my $oldValClass =
           $generator->( name => 'OldValue', body => $oldValueBody, );
-        my $class = $generator->( extends => 'OldValue', );
+        my $class = $generator->( 'extends' => 'OldValue', );
 
         my $o = $class->new( attr => "construction" );
         $o->attr("set");
@@ -283,8 +283,8 @@ CODE
             my $noFilterClass =
               $generator->( name => 'NoFilter', body => $noFilterBody );
             my $class = $generator->(
-                extends => 'NoFilter',
-                body    => <<'CODE',
+                'extends' => 'NoFilter',
+                body      => <<'CODE',
 use MooX::AttributeFilter;
 
 has '+attr' => ();
